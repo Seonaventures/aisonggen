@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Song Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        input, select, textarea, button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            width: 80%;
+            max-width: 400px;
+        }
+        #downloadLink {
+            display: none;
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Create Your Song 🎵</h2>
+    
+    <input type="text" id="songName" placeholder="Enter song name">
+    
+    <select id="songGenre">
+        <option value="">Select Genre</option>
+        <option value="pop">Pop</option>
+        <option value="rock">Rock</option>
+        <option value="hiphop">Hip-Hop</option>
+        <option value="jazz">Jazz</option>
+    </select>
+    
+    <textarea id="songLyrics" rows="5" placeholder="Enter song lyrics"></textarea>
+    
+    <button onclick="createSong()">Create Song</button>
+    
+    <a id="downloadLink" href="#" target="_blank">🎶 Download Your Song</a>
+
+    <script>
+        async function createSong() {
+            const songName = document.getElementById("songName").value;
+            const songGenre = document.getElementById("songGenre").value;
+            const songLyrics = document.getElementById("songLyrics").value;
+            
+            if (!songName || !songGenre || !songLyrics) {
+                alert("Please fill in all fields!");
+                return;
+            }
+            
+            const apiUrl = "https://api.topmediai.com/v2/submit";
+            const apiKey = "nanansn";  // Replace with your actual API key
+            
+            const requestData = {
+                is_auto: 0,
+                prompt: songGenre,
+                lyrics: songLyrics,
+                model_version: "v3.0",
+                title: songName
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: {
+                        "x-api-key": apiKey,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                const data = await response.json();
+                
+                if (data.downloadUrl) {
+                    const downloadLink = document.getElementById("downloadLink");
+                    downloadLink.href = data.downloadUrl;
+                    downloadLink.style.display = "block";
+                    downloadLink.textContent = "🎶 Download Your Song";
+                } else {
+                    alert("Error generating song. API might be returning an unexpected response.");
+                    console.log("API Response:", data);
+                }
+
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Something went wrong. Check the console for details.");
+            }
+        }
+    </script>
+
+</body>
+</html>
